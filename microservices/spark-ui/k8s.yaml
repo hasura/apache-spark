@@ -1,0 +1,54 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: spark-ui
+      hasuraService: custom
+    name: spark-ui
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: spark-ui
+      spec:
+        containers:
+        - image: elsonrodriguez/spark-ui-proxy:1.0
+          imagePullPolicy: IfNotPresent
+          name: spark-ui
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          args:
+            - spark-master:8080
+          resources: {}
+        securityContext: {}
+        terminationGracePeriodSeconds: 0
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: spark-ui
+      hasuraService: custom
+    name: spark-ui
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: spark-ui
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

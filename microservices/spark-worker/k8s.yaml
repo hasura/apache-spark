@@ -1,0 +1,57 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: spark-worker
+      hasuraService: custom
+    name: spark-worker
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    replicas: 2
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: spark-worker
+      spec:
+        containers:
+        - image: k8s.gcr.io/spark:1.5.2_v1
+          imagePullPolicy: IfNotPresent
+          command: ["/start-worker"]
+          name: worker
+          ports:
+          - containerPort: 8081
+            protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 500Mi
+        securityContext: {}
+        terminationGracePeriodSeconds: 0
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: spark-worker
+      hasuraService: custom
+    name: spark-worker
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: spark-worker
+    clusterIP: None
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
